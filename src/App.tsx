@@ -6,6 +6,7 @@ function App() {
   const [age, setAge] = useState(1);
   const [happiness, setHappiness] = useState(80);
   const [sleepiness, setSleepiness] = useState(20);
+  const [isFeeding, setIsFeeding] = useState(false);
   
   // Mouse tracking state for 3D tilt
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -27,12 +28,11 @@ function App() {
   // Web Speech API for Baby Voice
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop current speech
+      window.speechSynthesis.cancel(); 
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.pitch = 1.8; // High pitch for baby voice
+      utterance.pitch = 1.8; 
       utterance.rate = 1.1;
       
-      // Try to find a friendly female/child voice if available
       const voices = window.speechSynthesis.getVoices();
       const childVoice = voices.find(v => v.name.toLowerCase().includes('child') || v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('zira'));
       if (childVoice) {
@@ -47,6 +47,12 @@ function App() {
     setHappiness(prev => Math.min(100, prev + 20));
     setSleepiness(prev => Math.min(100, prev + 10));
     speak('Yummy! Thank you!');
+    
+    // Temporarily show the eating picture
+    setIsFeeding(true);
+    setTimeout(() => {
+      setIsFeeding(false);
+    }, 3000); // Back to normal after 3 seconds
   };
 
   const handlePlay = () => {
@@ -66,7 +72,7 @@ function App() {
   };
 
   const handleSleep = () => {
-    setSleepiness(0);
+    setSleepiness(100); // Max sleepiness triggers sleeping photo
     setHappiness(prev => Math.min(100, prev + 10));
     speak('Yawn... Goodnight...');
   };
@@ -81,10 +87,18 @@ function App() {
     return 'none';
   };
 
+  // Dynamically choose the right image based on state!
+  const getCurrentImage = () => {
+    const baseUrl = import.meta.env.BASE_URL;
+    if (isFeeding) return `${baseUrl}baby_eating.png`;
+    if (sleepiness > 80) return `${baseUrl}baby_sleeping.png`;
+    if (happiness < 30) return `${baseUrl}baby_crying.png`;
+    return `${baseUrl}baby_character.png`; // Default happy baby
+  };
+
   const tiltX = -mousePos.y * 15;
   const tiltY = mousePos.x * 15;
 
-  // Dynamic Background classes based on state
   const getBackgroundClass = () => {
     if (sleepiness > 80) return 'bg-night';
     if (happiness > 80) return 'bg-happy';
@@ -109,7 +123,7 @@ function App() {
                 }}
               >
                 <img 
-                  src={`${import.meta.env.BASE_URL}baby_character.png`} 
+                  src={getCurrentImage()} 
                   alt="AI Baby" 
                   className="baby-image"
                   style={{ filter: getBabyFilter() }} 
