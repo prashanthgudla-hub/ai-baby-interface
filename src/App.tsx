@@ -109,7 +109,7 @@ function App() {
                 }}
               >
                 <img 
-                  src="/baby_character.png" 
+                  src={`${import.meta.env.BASE_URL}baby_character.png`} 
                   alt="AI Baby" 
                   className="baby-image"
                   style={{ filter: getBabyFilter() }} 
